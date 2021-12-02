@@ -41,7 +41,7 @@ public class DynamicProgrammingSeamFinder implements SeamFinder {
                     boolean in_bounds = y + z >= 0 && y + z < picture.height();
                     if (!in_bounds)
                         continue;
-                    double this_energy = f.apply(picture, x - 1, y + z);
+                    double this_energy = pixels[x - 1][y + z];
                     if (this_energy < min_energy)
                         min_energy = this_energy;
                 }
@@ -49,9 +49,6 @@ public class DynamicProgrammingSeamFinder implements SeamFinder {
                 pixels[x][y] = f.apply(picture, x, y) + min_energy;
             }
         }
-        //for (int y = 0; y < picture.height(); y++){
-        //    System.out.println(y + ", " + pixels[picture.width()-1][y]);
-        //}
 
         // track back though the columns and assemble the return list
         List<Integer> return_list = new ArrayList<>();
