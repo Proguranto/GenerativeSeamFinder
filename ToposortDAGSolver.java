@@ -1,5 +1,4 @@
 package graphs;
-import io.javalin.core.validation.MissingConverterException;
 
 import java.util.*;
 
@@ -22,21 +21,16 @@ public class ToposortDAGSolver<V> implements ShortestPathSolver<V> {
     public ToposortDAGSolver(Graph<V> graph, V start) {
         this.edgeTo = new HashMap<>();
         this.distTo = new HashMap<>();
-        // TODO: Replace with your code
-        List<V> results = toposort(graph, start);
-    }
 
-    private List<V> toposort(Graph graph) {
         Set<V> visited = new HashSet<>();
         List<V> result = new ArrayList<>();
 
-        for (V start : graph.vertices()) {
-            if (!visited.contains(start)) {
-                dfsPostOrder(graph, start, visited, result);
-            }
-        }
+        // set up starting vertex
+        edgeTo.put(start, null);
+        distTo.put(start, 0.0);
+
+        dfsPostOrder(graph, start, visited, result);
         Collections.reverse(result);
-        return result;
     }
 
     /**
@@ -49,12 +43,20 @@ public class ToposortDAGSolver<V> implements ShortestPathSolver<V> {
      */
     private void dfsPostOrder(Graph<V> graph, V start, Set<V> visited, List<V> result) {
         visited.add(start);
-        for (Edge edge : graph.neighbors(start)) {
-            V neighbor = edge.to;
-            if (!visited.contains(neighbor)) {
-                dfsPostOrder(graph, neighbor, visited, result);
+        for (Edge<V> neighbor : graph.neighbors(start)) {
+            if (!visited.contains(neighbor.to)) {
+                // recursive call to go through each neighbor
+                dfsPostOrder(graph, neighbor.to, visited, result);
+            }
+            double oldDist = distTo.getOrDefault(neighbor.to, Double.POSITIVE_INFINITY);
+            double newDist = distTo.get(start) + neighbor.weight;
+            if (newDist < oldDist) {
+                edgeTo.put(neighbor.to, neighbor);
+                distTo.put(neighbor.to, newDist);
             }
         }
+
+        // post order, adding to list after traversing
         result.add(start);
     }
 
