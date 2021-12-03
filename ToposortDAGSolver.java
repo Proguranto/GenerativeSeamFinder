@@ -21,16 +21,25 @@ public class ToposortDAGSolver<V> implements ShortestPathSolver<V> {
     public ToposortDAGSolver(Graph<V> graph, V start) {
         this.edgeTo = new HashMap<>();
         this.distTo = new HashMap<>();
-
-        Set<V> visited = new HashSet<>();
-        List<V> result = new ArrayList<>();
-
         // set up starting vertex
         edgeTo.put(start, null);
         distTo.put(start, 0.0);
-
+        
+        Set<V> visited = new HashSet<>();
+        List<V> result = new ArrayList<>();
         dfsPostOrder(graph, start, visited, result);
         Collections.reverse(result);
+
+        for (V vertex : result) {
+            for (Edge<V> e : graph.neighbors(vertex)) {
+                double oldDist = distTo.getOrDefault(e.to, Double.POSITIVE_INFINITY);
+                double newDist = distTo.get(e.from) + e.weight;
+                if (newDist < oldDist) {
+                    edgeTo.put(e.to, e);
+                    distTo.put(e.to, newDist);
+                }
+            }
+        }
     }
 
     /**
@@ -47,12 +56,6 @@ public class ToposortDAGSolver<V> implements ShortestPathSolver<V> {
             if (!visited.contains(neighbor.to)) {
                 // recursive call to go through each neighbor
                 dfsPostOrder(graph, neighbor.to, visited, result);
-            }
-            double oldDist = distTo.getOrDefault(neighbor.to, Double.POSITIVE_INFINITY);
-            double newDist = distTo.get(start) + neighbor.weight;
-            if (newDist < oldDist) {
-                edgeTo.put(neighbor.to, neighbor);
-                distTo.put(neighbor.to, newDist);
             }
         }
 
