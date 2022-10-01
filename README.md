@@ -1,1 +1,1 @@
-# Shortest-Paths
+# Generative Seam Finder
